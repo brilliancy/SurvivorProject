@@ -27,6 +27,7 @@ def main():
 
 		soup = BeautifulSoup(the_page, 'xml') 
 	class clean_data():
+		pass
 	'''
 	note: will have to update the data frame in save_pandas to the clean one
 	Specification: 
