@@ -1,4 +1,4 @@
-def main():
+def scraper():
 	import urllib, http.cookiejar
 	from pprint import pprint
 	from bs4 import BeautifulSoup
@@ -15,7 +15,17 @@ def main():
 		#UrlMainName = 'http://www.cbs.com/shows/survivor/video/647453A3-F802-2BA1-8C90-BF50EC692B75/survivor-second-chance-play-to-win/'
 		#opener = urllib.request.urlopen(UrlMainName)
 		#print(opener.read())
+		'''
+		episode_dic = {'1':13,'2':15,'3':15,'4':14,'5':14,'6':14,'7':14,'8':16,'9':14,'10':14,'11':14,'12':15,'13':15,'14':14,'15':14,'16':14,'17':13,'18':14,'19':15,'20':15,'21':15,'22':14,'23':15,'24':14,'25':14,'26':14,'27':14,'28':13,'29':14,'30':14,'31':8}
+		EpisodeLib_dic = {'1':13,'2':15,'3':15,'4':14,'5':14,'6':14,'7':14,'8':16,'9':14,'10':14,'11':14,'12':15,'13':15,'14':14,'15':14,'16':14,'17':13,'18':14,'19':15)
 		
+		for key in EpisodeLib_dic:
+			Season = key
+			Episode = EpisodeLib_dic[key]
+
+
+		'''
+
 		Season = '31' # future string formmating loops
 		Episode = '7' # library url changes at episode 19,20
 		UrlSecondaryName = 'http://www.cbsstatic.com/closedcaption/Current/Primetime/DFXP/CBS_SURVIVOR_{0}{1:0>2}_CONTENT_CIAN_caption_DFXP.xml'.format(Season,Episode)
@@ -74,7 +84,7 @@ def main():
 	#ISSUE TO SOLVE: getting some funky text from original xml document along with combined words, going to need to spell
 
 	
-main()
+scraper()
 '''
 for the season and episode string formmating url
 series = {'1':13,2:13}
