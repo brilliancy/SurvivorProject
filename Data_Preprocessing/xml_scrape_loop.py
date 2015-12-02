@@ -9,6 +9,7 @@ import numpy as np
 import sys
 import os
 import collections
+import re
 
 cj = http.cookiejar.CookieJar()
 
@@ -26,33 +27,15 @@ def load_data(Season,episode_num,UrlName):
 	req = urllib.request.Request(UrlName)
 	response = urllib.request.urlopen(req)
 	the_page = response.read()
+	#pdb.set_trace()
+	new_text= re.sub('<br></br>',' ',str(the_page)) # replace br tags with spaces 
+	soup = BeautifulSoup(new_text, ) 
+	#soup = BeautifulSoup(new_text, 'xml') 
 
-	soup = BeautifulSoup(the_page, 'xml') 
+	
 	return soup
 def clean_data():
 	pass
-'''
-note: will have to update the data frame in save_pandas to the clean one
-Specification: 
-	if length of text is longer than a certain amount then insert a space at a certain point
-	cons no longer works since the concatenation is not at a fixed point
-Plan B_Specification:
-	See how BeautifulSoup is getting the text and if it grabs to lines then to split them
-	http://stackoverflow.com/questions/28385881/modifying-a-beautifulsoup-string-with-line-breaks
-	http://stackoverflow.com/questions/31958517/beautifulsoup-how-to-extract-text-after-br-tag
-Plan C_specification: 
-	Use norvig's spellcheck http://norvig.com/spell-correct.html
-	cons: might cause
-
-
-
-Plan B:
-for row in soup.find_all('p'): br_edit = soup.find_all('br')
-for i in br_edit: ''.join(i.next_siblings) #concatenates the generator obj
-
-'''
-
-
 def create_dataframe(soup):
 	#pdb.set_trace()
 	subtitles_text = []
@@ -61,20 +44,17 @@ def create_dataframe(soup):
 
 	for item in soup.find_all('p'): 
 		subtitles_text.append(item.text) #note: Season 11, episode 10
-
 		begin_val = item.get('begin', 'bs val')
 		begin.append(begin_val)
 		end_val = item.get('begin', 'bs val')
 		end.append(end_val)
-
-	#if 'bs val' in begin or 'bs val' in end:
-	#	print (begin, end)
 
 	subtitles_df = pd.DataFrame({
 		'subtitles_text':subtitles_text,
 		'begin':begin,
 		'end':end
 		})
+	subtitles_df = subtitles_df.ix[1:] # removing the first row of the data frame
 	return subtitles_df
 
 def save_pandas(Season,episode_num,subtitles_df):
@@ -82,7 +62,7 @@ def save_pandas(Season,episode_num,subtitles_df):
 	rel_path = 'DataFrames/{0}{1:0>2}.csv'.format(Season,episode_num)
 	abs_file_path = os.path.join(script_dir, rel_path)
 	subtitles_df.to_csv(abs_file_path)
-
-#ISSUE TO SOLVE: getting some funky text from original xml document along with combined words, going to need to spell
-
-#scraper()
+'''
+ISSUE TO SOLVE: getting some funky text from original xml document that are the xml syntax that don't 
+necessarily translate well into plaintext english
+'''
