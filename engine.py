@@ -14,7 +14,6 @@ def main():
 	class run_scraper(): 
 		episode_dic = {'28':13,'29':14,'30':14,'31':11}
 		episode_lib_dic = {'1':13,'2':15,'3':15,'4':14,'5':14,'6':14,'7':14,'8':16,'9':14,'10':14,'11':14,'12':15,'13':15,'14':14,'15':14,'16':14,'17':13,'18':14,'19':15,'20':15,'21':15,'22':13,'23':15,'24':14,'25':14,'26':14,'27':14}
-		test_episode_lib_dic = {'1':2}
 		episode_dic = collections.OrderedDict(sorted(episode_dic.items()))
 		episode_lib_dic = collections.OrderedDict(sorted(episode_lib_dic.items())) #resplace episode_lib_dic with test_espisode
 		for key in episode_lib_dic:
