@@ -34,12 +34,17 @@
   
 * things to do in order
   * clean the rest of the data
-  * clean out the >> and unique characters
+    * combined into one large df
+    * turn subtitles time into date time library 
+    * clean out the >> and unique characters
+    * I still have some combined words. Perhaps just add a space after every text before reading it into a csv  
   * EDA
     * tfidf
   * model 
     * feed in list of name and have a fixed ngrams of how many positive or negative words are near that name.
-    * feed in a suvivor specific list.
+      * need to SCRAPE list of names
+    * feed in a suvivor specific list of words that are likely to predict if someone will be voted out
     * subset based on time
       * need to change time to date time format
-
+  * how to know when I did a good job
+    * have a list of who was voted out. (NEED TO SCRAPE)

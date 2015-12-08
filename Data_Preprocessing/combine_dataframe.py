@@ -29,6 +29,7 @@ def main():
 			frames = [TopDf,BottomDf]
 			TopDf = pd.concat(frames)
 	MasterDf = TopDf
+	MasterDf = MasterDf.drop(MasterDf.columns[0], axis=1)  
 	MasterDf.to_csv('DataFrames/MasterDf.csv')
 	
 
