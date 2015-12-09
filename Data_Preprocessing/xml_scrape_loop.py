@@ -43,7 +43,7 @@ def create_dataframe(soup):
 	end = []
 
 	for item in soup.find_all('p'): 
-		subtitles_text.append(item.text) #note: Season 11, episode 10
+		subtitles_text.append(item.text) #adds a space at the end of every text
 		begin_val = item.get('begin', 'bs val')
 		begin.append(begin_val)
 		end_val = item.get('begin', 'bs val')
@@ -62,7 +62,3 @@ def save_pandas(Season,episode_num,subtitles_df):
 	rel_path = 'DataFrames/{0}{1:0>2}.csv'.format(Season,episode_num)
 	abs_file_path = os.path.join(script_dir, rel_path)
 	subtitles_df.to_csv(abs_file_path)
-'''
-ISSUE TO SOLVE: getting some funky text from original xml document that are the xml syntax that don't 
-necessarily translate well into plaintext english
-'''

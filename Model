@@ -1,0 +1,3 @@
+#token = word
+#ngram =character or word
+def main
