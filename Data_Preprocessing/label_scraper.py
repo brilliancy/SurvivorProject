@@ -25,10 +25,41 @@ def main():
 	#req = urllib.request(wiki,headers=header)
 	#page = urllib.urlopen(req)
 	soup = BeautifulSoup(the_page)
-	pdb.set_trace()
+
 
 	table = soup.find("table")
-	print(table)
+	# print(table)
 
+	Contestents = []
+	Age = ""
+	Hometown = ""
+	Season = ""
+	Finish = ""
+	Tribal_Challg_Wins = ""
+	Indiv_Challg_Wins = ""
+	Total_Wins = ""
+	Days_Lasted = ""
+	Votes_Against = ""
+
+	for row in table.findAll("tr"):
+		cells = [x.text for x in row.findAll("td")]
+	#For each "tr", assign each "td" to a variable.
+		if len(cells) == 10:
+			# pdb.set_trace()
+
+			Contestents.append(cells[0])
+
+			# Contestents.append(contestents)
+			#Age = append(cells[1])
+			# Hometown = append(cells[2])
+			# Season = cells[3].find(text=True)
+			# Finish = cells[4].find(text=True)
+			# Tribal_Challg_Wins = cells[5].find(text=True)
+			# Indiv_Challg_Wins= cells[6].find(text=True)
+			# Total_Wins= cells[7].find(text=True)
+			# Days_Lasted= cells[8].find(text=True)
+			# Votes_Against= cells[9].find(text=True)
+	# pdb.set_trace()
+	print(Contestents)
 
 main()

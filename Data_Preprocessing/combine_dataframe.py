@@ -15,8 +15,18 @@ def main():
 
 	******PROBLEM: makes an assumption that the dictionary is in order, however it isn't****
 	'''
-	episode_lib_dic = {'1':13,'2':15,'3':15,'4':14,'5':14,'6':14,'7':14,'8':16,'9':14,'10':14,'11':14,'12':15,'13':15,'14':14,'15':14,'16':14,'17':13,'18':14,'19':15,'20':15,'21':15,'22':13,'23':15,'24':14,'25':14,'26':14,'27':14,'28':13,'29':14,'30':14,'31':11}
+	#episode_list = ['1':13,'2':15,'3':15,'4':14,'5':14,'6':14,'7':14,'8':16,'9':14,'10':14,'11':14,'12':15,'13':15,'14':14,'15':14,'16':14,'17':13,'18':14,'19':15,'20':15,'21':15,'22':13,'23':15,'24':14,'25':14,'26':14,'27':14,'28':13,'29':14,'30':14,'31':11]
+	#episode_lib_dic = {'1':13,'2':15,'3':15,'4':14,'5':14,'6':14,'7':14,'8':16,'9':14,'10':14,'11':14,'12':15,'13':15,'14':14,'15':14,'16':14,'17':13,'18':14,'19':15,'20':15,'21':15,'22':13,'23':15,'24':14,'25':14,'26':14,'27':14,'28':13,'29':14,'30':14,'31':11}
 	
+	episode_list = [13, 15, 15, 14,14,14,14,16,14,14,14,15,15,14,14,14,13,14,15,15,15,13,15,14,14,14,14,13,14,14,11]
+	season_list = [i for i in range(1,32)]
+	
+	episode_ord_dict = collections.OrderedDict()
+	
+	for x,y in zip(season_list,episode_list):
+		episode_ord_dict[str(x)] = y 
+
+
 	first_file = 'DataFrames/101.csv'
 	TopDf = pd.read_csv(first_file)
 	TopDf['Season'] = 1
@@ -25,7 +35,7 @@ def main():
 	EpisodeID_num = 1
 	TopDf['EpisodeId'] = EpisodeID_num
 
-	for season,episode in sorted(episode_lib_dic.items()):
+	for season,episode in episode_ord_dict.items():
 		for episode_num in range(2,episode+1):
 			print('Season:',season,'Episode:',episode_num)
 			script_dir = os.path.dirname(__file__)
