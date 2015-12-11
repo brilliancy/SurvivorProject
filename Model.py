@@ -25,6 +25,12 @@ def main():
 		http://streamhacker.com/2010/06/16/text-classification-sentiment-analysis-eliminate-low-information-features/
 
 	****random forest
+	dont need to do sentiment scores since it looks at the words itself
+	could build 3 models: random forest,bayes
+	  * with sentiment scores
+	  * without sentiment scores
+	  * with sentiment scores and looking at only EXTREME sentiment
+
 	base classifiers n_estimators = several hundred up to 1000
 	njobs =-1
 	records = episode
