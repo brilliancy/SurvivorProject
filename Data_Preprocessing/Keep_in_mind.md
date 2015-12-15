@@ -40,6 +40,7 @@
     * I still have some combined words. Perhaps just add a space after every text before reading it into a csv  
   * EDA
     * tfidf
+    * stem 
   * model 
     * feed in list of name and have a fixed ngrams of how many positive or negative words are near that name.
       * need to SCRAPE list of names
@@ -48,3 +49,10 @@
       * need to change time to date time format
   * how to know when I did a good job
     * have a list of who was voted out. (NEED TO SCRAPE)
+  * What to SUBMIT
+    * code
+    * Data (optional)
+    * brief write-up
+    * image(optional)
+    * presentation materials
+    
