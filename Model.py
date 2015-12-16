@@ -92,10 +92,6 @@ def main():
 	subset_2 = subset_1[subset_1.begin < sub_datetime("00:36:14")]
 	#can't do this apparently but i can just subset it twice
 	#masterDf[masterDf.begin >= sub_datetime("00:35:55") and masterDf.begin <= sub_datetime("00:36:14")]
-	
-
-	#subset some seasons just to see if it works at least
-	subset_3 = subset_2[subset_2["Season"].isin([28,29,30])]
 
 	labelDf = labelDf[:550]
 	# cleaning  2 2', ' N/A' '1st
@@ -139,10 +135,15 @@ def main():
 	#Let's start Model 1 
 
 	#bucketing target variable
-	bins = numpy.linspace(0,16,3)
-	labelDf["Finish_bucket"] = numpy.digitize(labelDf.Finish,bins)
+	#bins = numpy.linspace(0,16,3)
+	#labelDf["Finish_bucket"] = numpy.digitize(labelDf.Finish,bins)
 
 	def fit_model_1():
+		#bucketing target variable
+		bins = numpy.linspace(0,16,3)
+		labelDf["Finish_bucket"] = numpy.digitize(labelDf.Finish,bins)
+
+		# can't add parameter
 		models = [LogisticRegression(),GradientBoostingClassifier(),RandomForestClassifier()]
 
 		features = labelDf[["Indiv_Challg_Wins","Tribal_Challg_Wins"]]
@@ -160,7 +161,9 @@ def main():
 		print('\nAVG RandomForestClassifier acc: ', scores[2].mean())
 
 	#Let's start Model 2
-
+	pdb.set_trace()
+	#subset some seasons just to see if it works at least
+	subset_3 = subset_2[subset_2["Season"].isin([28,29,30])]
 	#relevant target variables for Model 2
 	labelDf = labelDf[["Contestant_names","Finish"]]
 
