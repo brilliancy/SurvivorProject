@@ -1,9 +1,15 @@
 import pdb
 import pandas as pd
+import numpy
 import pickle
 import re
 import os
 import datetime
+
+from sklearn.cross_validation import cross_val_score
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import GradientBoostingClassifier 
+from sklearn.ensemble import RandomForestClassifier 
 
 #token = word
 #ngram =character or word
@@ -72,32 +78,98 @@ def main():
 	labelDf = cleaning_labelDf()
 
 	def sub_datetime(k):
-		#sub_time = re.split(':|\.',k)
-		#sub_time = map(int, sub_time)
-	
-		#time = datetime.datetime(1,1,1,*map(int, sub_time))
-		#date_object = datetime.strptime("00:00:03.73"', '%02d:%02d:%02d%s')
-		#format = "%H:%M:%S.%f"
 		format = "%H:%M:%S"
 		time = datetime.datetime.strptime(k[:8],format)
-		#return('{0:0>2}:{1:0>2}:{2:0>2}'.format(time.hour,time.minute,time.second))
 		return time
-	#masterDf.end = masterDf.end.apply(lambda k:sub_datetime(re.split(':|\.',k)))
+	
+	#changing columns to datetime type
 	masterDf.end = masterDf.end.apply(sub_datetime)
 	masterDf.begin = masterDf.begin.apply(sub_datetime)
 
+	#removing noise by selecting features where they are in a 'voting phase'
+	# Note: I need to further subset the specials episode where the time stamps for voting will be different
 	subset_1 = masterDf[masterDf.begin > sub_datetime("00:28:34")]
 	subset_2 = subset_1[subset_1.begin < sub_datetime("00:36:14")]
 	#can't do this apparently but i can just subset it twice
 	#masterDf[masterDf.begin >= sub_datetime("00:35:55") and masterDf.begin <= sub_datetime("00:36:14")]
 	
 
+	#subset some seasons just to see if it works at least
+	subset_3 = subset_2[subset_2["Season"].isin([28,29,30])]
+
+	labelDf = labelDf[:550]
+	# cleaning  2 2', ' N/A' '1st
+	def cleaning_Finish_col():
+		#labelDf = labelDf[:550]
+		labelDf.Finish.unique() # find unique values
+
+		labelDf.Finish = labelDf.Finish.replace(' N/A','20')
+		labelDf.Finish = labelDf.Finish.replace(' 2 2','2')
+		labelDf.Finish = labelDf.Finish.replace('st','',regex=True)
+
+		labelDf.Finish = labelDf.Finish.apply(lambda k: int(k))
+		return(labelDf)
+
+	labelDf = cleaning_Finish_col()
+
+	#Starting Model1
+
+	def cleaning_Indiv_col():
+		labelDf.Indiv_Challg_Wins.unique()
+		labelDf.Indiv_Challg_Wins = labelDf.Indiv_Challg_Wins.replace([' N/A','N/A'],'0',regex=True)
+		labelDf.Indiv_Challg_Wins = labelDf.Indiv_Challg_Wins.apply(lambda k: int(k))
+		return(labelDf)
+	
+	labelDf = cleaning_Indiv_col()
+
+	def cleaning_Tribal_col():
+		labelDf.Tribal_Challg_Wins.unique()
+		labelDf.Tribal_Challg_Wins = labelDf.Tribal_Challg_Wins.replace(' N/A','0',regex=True)
+		labelDf.Tribal_Challg_Wins = labelDf.Tribal_Challg_Wins.apply(lambda k: int(k))
+		return(labelDf)
+	labelDf = cleaning_Tribal_col()
+
+	def cleaning_Season_label():
+		labelDf.Season.unique()
+		labelDf.Season = labelDf.Season.replace(' Sou Pacific','23',regex=True)
+		labelDf.Season = labelDf.Season.apply(lambda k: int(k))
+		return(labelDf)
+	labelDf = cleaning_Season_label()
+
+	#Let's start Model 1 
+
+	#bucketing target variable
+	bins = numpy.linspace(0,16,3)
+	labelDf["Finish_bucket"] = numpy.digitize(labelDf.Finish,bins)
+
+	def fit_model_1():
+		models = [LogisticRegression(),GradientBoostingClassifier(),RandomForestClassifier()]
+
+		features = labelDf[["Indiv_Challg_Wins","Tribal_Challg_Wins"]]
+		target = labelDf["Finish_bucket"]
+
+		scores = [cross_val_score(i,features,target,cv = 10) for i in models]
+
+		print('\nLogistic Regression acc: ', '\n', scores[0])
+		print('\nAVG Logistic Regression acc: ', scores[0].mean())
+
+		print('\nGradient Boosting Classifier: ', '\n', scores[1])
+		print('\nAVG Gradient Boosting Classifier acc: ', scores[1].mean())
+
+		print('\nRandomForestClassifier: ', '\n', scores[2])
+		print('\nAVG RandomForestClassifier acc: ', scores[2].mean())
+
+	#Let's start Model 2
+
+	#relevant target variables for Model 2
+	labelDf = labelDf[["Contestant_names","Finish"]]
+
+
 	'''
 	 for line in lines:
 	        if subtime.findall(line):
 	           time = datetime.datetime(1,1,1,*map(int, line[:8].split(':')))
 	'''
-	pdb.set_trace()
 
 
 
