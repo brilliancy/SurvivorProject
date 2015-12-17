@@ -5,11 +5,17 @@ import pickle
 import re
 import os
 import datetime
+import nltk
+from textblob import TextBlob
+
 
 from sklearn.cross_validation import cross_val_score
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import GradientBoostingClassifier 
 from sklearn.ensemble import RandomForestClassifier 
+
+from nltk.tokenize import RegexpTokenizer
+from nltk.text import Text
 
 #token = word
 #ngram =character or word
@@ -61,8 +67,6 @@ def main():
 	def cleaning_MasterDf():
 		masterDf = pd.read_csv("Data_Preprocessing/DataFrames/MasterDf.csv")
 		return(masterDf)
-	#script_dir = os.path.dirname(__file__)
-	#pdb.set_trace()
 
 	def cleaning_labelDf():
 		
@@ -85,13 +89,6 @@ def main():
 	#changing columns to datetime type
 	masterDf.end = masterDf.end.apply(sub_datetime)
 	masterDf.begin = masterDf.begin.apply(sub_datetime)
-
-	#removing noise by selecting features where they are in a 'voting phase'
-	# Note: I need to further subset the specials episode where the time stamps for voting will be different
-	subset_1 = masterDf[masterDf.begin > sub_datetime("00:28:34")]
-	subset_2 = subset_1[subset_1.begin < sub_datetime("00:36:14")]
-	#can't do this apparently but i can just subset it twice
-	#masterDf[masterDf.begin >= sub_datetime("00:35:55") and masterDf.begin <= sub_datetime("00:36:14")]
 
 	labelDf = labelDf[:550]
 	# cleaning  2 2', ' N/A' '1st
@@ -131,9 +128,11 @@ def main():
 		labelDf.Season = labelDf.Season.apply(lambda k: int(k))
 		return(labelDf)
 	labelDf = cleaning_Season_label()
-
-	#Let's start Model 1 
-
+	'''
+	****************************************************************************
+	Let's start Model 1
+	****************************************************************************
+	'''
 	#bucketing target variable
 	#bins = numpy.linspace(0,16,3)
 	#labelDf["Finish_bucket"] = numpy.digitize(labelDf.Finish,bins)
@@ -143,7 +142,7 @@ def main():
 		bins = numpy.linspace(0,16,3)
 		labelDf["Finish_bucket"] = numpy.digitize(labelDf.Finish,bins)
 
-		# can't add parameter
+		# can't add parameter n_jobs = -1 for some reason
 		models = [LogisticRegression(),GradientBoostingClassifier(),RandomForestClassifier()]
 
 		features = labelDf[["Indiv_Challg_Wins","Tribal_Challg_Wins"]]
@@ -160,22 +159,102 @@ def main():
 		print('\nRandomForestClassifier: ', '\n', scores[2])
 		print('\nAVG RandomForestClassifier acc: ', scores[2].mean())
 
-	#Let's start Model 2
-	pdb.set_trace()
-	#subset some seasons just to see if it works at least
-	subset_3 = subset_2[subset_2["Season"].isin([28,29,30])]
+	#fit_model_1()
+
+	'''
+	****************************************************************************
+	Let's start Model 2
+	****************************************************************************
+	'''
+	#removing noise by selecting features where they are in a 'voting phase'
+	# Note: I need to further subset the specials episode where the time stamps for voting will be different
+
+	subset_1 = masterDf[(masterDf.begin > sub_datetime("00:28:34")) & (masterDf.begin < sub_datetime("00:36:14")) ]
+
 	#relevant target variables for Model 2
 	labelDf = labelDf[["Contestant_names","Finish"]]
 
 
-	'''
-	 for line in lines:
-	        if subtime.findall(line):
-	           time = datetime.datetime(1,1,1,*map(int, line[:8].split(':')))
-	'''
+	#subset some seasons just to see if it works at least
+	def subset_by_season(Season_begin,Season_end):
+		#temporarily subset_2 instead of masterDf
+		subset_2 = subset_1[(subset_1.Season >= Season_begin) & (subset_1.Season <= Season_end)]
+		return subset_2
+
+	subset_3 = subset_by_season(28,30)
+
+	#get unique episodes from subset_3
+
+	def get_ep_tokens(EpID):
+		subset_episode = subset_3[subset_3.EpisodeId == EpID].copy()
+		#subset_episode['subtitles_text'] = subset_episode.subtitles_text.apply(lambda k: k + ' ')
 
 
+		# df.loc[:, cols] = df.loc[:, cols].applymap(some_function) 
+		#cols = 'subtitles_text'
+		#subset_episode.loc[:, cols] = subset_episode.loc[:, cols].apply(lambda k: k + ' ') 
 
+		#labelDf.Tribal_Challg_Wins = labelDf.Tribal_Challg_Wins.apply(lambda k: int(k))
+		#subset_episode.subtitles_text = subset_episode.subtitles_text.apply(lambda k: k + ' ')
+	
+		text = ' '.join(subset_episode.subtitles_text) 
+		lowers = text.lower()
+		no_punctuation = re.sub('[\W_]+', ' ', lowers)
+
+		#pdb.set_trace()
+		#tokens = nltk.word_tokenize(no_punctuation)
+		tokenizer = RegexpTokenizer('\s+', gaps=True)
+		#tokens = tokenizer.tokenize(no_punctuation)
+		blob = TextBlob(no_punctuation,tokenizer=tokenizer)
+	
+		return blob
+
+	EpUnique = sorted(subset_3.EpisodeId.unique())
+
+	tokens_list = []
+	
+	for EpID in EpUnique: 
+		tokens_list.append(get_ep_tokens(EpID))
+	
+	#for i in tokens_list:
+
+
+	def n_concordance_tokenised(text,phrase,left_margin=5,right_margin=5):
+		#concordance replication via https://simplypython.wordpress.com/2014/03/14/saving-output-of-nltk-text-concordance/
+		phraseList=phrase.split(' ')
+	 
+		c = nltk.ConcordanceIndex(text.tokens, key = lambda s: s.lower())
+		 
+		#Find the offset for each token in the phrase
+		offsets=[c.offsets(x) for x in phraseList]
+		offsets_norm=[]
+		#For each token in the phraselist, find the offsets and rebase them to the start of the phrase
+		for i in range(len(phraseList)):
+			offsets_norm.append([x-i for x in offsets[i]])
+		#We have found the offset of a phrase if the rebased values intersect
+		#--
+		# http://stackoverflow.com/a/3852792/454773
+		#the intersection method takes an arbitrary amount of arguments
+		#result = set(d[0]).intersection(*d[1:])
+		#--
+		intersects=set(offsets_norm[0]).intersection(*offsets_norm[1:])
+		 
+		concordance_txt = ([text.tokens[map(lambda x: x-left_margin if (x-left_margin) > 0 else 0,[offset])[0]:offset+len(phraseList)+right_margin]
+							for offset in intersects])
+		  
+		outputs=[''.join([x+' ' for x in con_sub]) for con_sub in concordance_txt]
+		return outputs
+	 
+	def n_concordance(txt,phrase,left_margin=5,right_margin=5):
+		tokens = nltk.word_tokenize(txt)
+		text = nltk.Text(tokens)
+	  
+		return n_concordance_tokenised(text,phrase,left_margin=left_margin,right_margin=right_margin)
+	
+	pdb.set_trace()
+
+
+	
 
 
 
