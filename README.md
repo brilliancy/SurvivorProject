@@ -12,3 +12,4 @@ GADS_Project:
 * engine.py = loops through xml_scrape_loop and handles any exceptions that arise. Returns list of csv's with subtitles
 * Model.py = contains a lot of feature engineering and the models. Model 1: estimators is individual/tribal challenge, estimand is how they finished, bucketed into 3 categories.
 * EDA.py = some exploratory data analysis of MasterDf
+  * Exploratory_Data_Analysis.md =  exploratory data analysis in a prettier format
