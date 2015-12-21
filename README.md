@@ -5,7 +5,7 @@ This is still a rough draft and the code is very messy and needs to be cleaned u
 Here is a list of files and their description:
 Data Preprocessing:
 * xml_scrape_loop.py = the webscraper for the subtitles
-* combine_dataframe.py = combines the csv's into one large dataframe, and cleans it up a little bit.
+* test_combine.py = combines the csv's into one large dataframe, and cleans it up a little bit.
 * label_scraper.py = scrapes labels for the dataset from wikia
 * season_scraper.py = scrapes wikipedia to map season name into season number for label_scraper.py
 GADS_Project:

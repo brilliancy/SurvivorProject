@@ -215,7 +215,7 @@ def main():
 	
 	# name concordance
 
-	list_of_names = labelDf.Contestant_names.apply(lambda k: k.split(" "))
+	list_of_names = label_sub_season.Contestant_names.apply(lambda k: k.split(" "))
 	
 	def concordance(tokenized_ep):
 
@@ -226,7 +226,7 @@ def main():
 
 		for indiv_name in list_of_names:
 			first_name, last_name = indiv_name[0], indiv_name[1]
-			print(first_name,last_name)
+			#print(first_name,last_name)
 			first_name_index = [ i for i, j in enumerate(tokenized_ep) if j == first_name.lower()] 
 			last_name_index = [ i for i, j in enumerate(tokenized_ep) if j == last_name.lower()] 
 
@@ -234,7 +234,7 @@ def main():
 				first_name_temp.append(tokenized_ep[name_loc-3:name_loc+3])
 			agg_firstname_concordance_dic[first_name] = first_name_temp
 			#some names like 'So' kim are refercing to the word 'so' instead of name 'So', and will
-			print(agg_firstname_concordance_dic)
+			#print(agg_firstname_concordance_dic)
 			first_name_temp = []
 
 			for name_loc in last_name_index:

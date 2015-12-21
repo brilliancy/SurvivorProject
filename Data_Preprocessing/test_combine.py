@@ -26,7 +26,7 @@ def main():
 	for x,y in zip(season_list,episode_list):
 		episode_ord_dict[str(x)] = y 
 
-
+	'''
 	first_file = 'DataFrames/101.csv'
 	TopDf = pd.read_csv(first_file)
 	TopDf['Season'] = 1
@@ -34,9 +34,14 @@ def main():
 
 	EpisodeID_num = 1
 	TopDf['EpisodeId'] = EpisodeID_num
+	'''
+	EpisodeID_num = 0
+	col_list = ['SentenceId','EpisodeId','Season','Episode','begin','end','subtitles_text']
+
+	TopDf = pd.DataFrame(columns=col_list)
 
 	for season,episode in episode_ord_dict.items():
-		for episode_num in range(2,episode+1):
+		for episode_num in range(1,episode+1): #***removed episode+1
 			print('Season:',season,'Episode:',episode_num)
 			script_dir = os.path.dirname(__file__)
 			rel_path = 'DataFrames/{0}{1:0>2}.csv'.format(season,episode_num)
@@ -56,17 +61,20 @@ def main():
 			#glues topDf and MiddleDf
 			frames = [TopDf,MiddleDf]
 			TopDf = pd.concat(frames)
-			print('this is TopDf:',TopDf.head())
-			print('this is MiddleDf',MiddleDf.head())
+			print('this is TopDf:\n',TopDf.head())
+			print('this is MiddleDf\n',MiddleDf.head())
+
 	#pdb.set_trace()
 
 	MasterDf = TopDf
-	MasterDf = MasterDf.drop(MasterDf.columns[0], axis=1)  
+	MasterDf = MasterDf.drop(MasterDf.columns[4], axis=1)  
 	
 	#adding SentenceId
 	sentence_list = [i for i in range(0,len(MasterDf)) ]
 	MasterDf['SentenceId'] = sentence_list
 	# reordering in a better way
+
+
 	MasterDf = MasterDf[['SentenceId','EpisodeId', 'Season','Episode','begin','end','subtitles_text']]
 
 
