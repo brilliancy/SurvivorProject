@@ -102,10 +102,10 @@ def main():
 		'Votes_Against':Votes_Against
 		})
 	c_labels_df = labels_df.replace('\n','',regex=True)
-	c_labels_df = c_labels_df.replace('th','',regex=True)
-	c_labels_df = c_labels_df.replace('rd','',regex=True)
-	c_labels_df = c_labels_df.replace('Runner-Up','2',regex=True)
-	c_labels_df = c_labels_df.replace('Sole Survivor','1',regex=True)
+	c_labels_df.Finish = c_labels_df.Finish.replace('th','',regex=True)
+	c_labels_df.Finish = c_labels_df.Finish.replace('rd','',regex=True)
+	c_labels_df.Finish = c_labels_df.Finish.replace('Runner-Up','2',regex=True)
+	c_labels_df.Finish = c_labels_df.Finish.replace('Sole Survivor','1',regex=True)
 
 	fileObject = open("season_labels",'rb') #changed to rb
 	season_labels = pickle.load(fileObject)  

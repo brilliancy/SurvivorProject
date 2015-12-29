@@ -64,7 +64,7 @@ def main():
 			print('this is TopDf:\n',TopDf.head())
 			print('this is MiddleDf\n',MiddleDf.head())
 
-	#pdb.set_trace()
+	pdb.set_trace()
 
 	MasterDf = TopDf
 	MasterDf = MasterDf.drop(MasterDf.columns[4], axis=1)  
