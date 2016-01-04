@@ -420,7 +420,7 @@ def main():
 
 	#model 3:(WIP)
 	ConcordDf = concordance_packager(labelDf,tokens_list)
-	
+	pdb.set_trace()
 
 main()
 
