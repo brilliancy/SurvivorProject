@@ -17,6 +17,8 @@ from sklearn.ensemble import RandomForestClassifier
 
 from nltk.tokenize import RegexpTokenizer
 from nltk.text import Text
+import seaborn as sns
+
 
 #token = word
 #ngram =character or word
@@ -441,7 +443,7 @@ def concordance_sentiment_packager(labelDf,tokens_list):
 	firstname_concordance = []
 	lastname_concordance = []
 
-	columns = ["Season","Episode","Contestant","Firstname_concordance","Lastname_concordance", "Sentiment_score_FN"]
+	columns = ["Season","Episode","Contestant","Firstname_concordance","Lastname_concordance", "Sentiment_score"]
 	ConcordDf = pd.DataFrame(columns = columns)
 
 	TopDf = pd.DataFrame(columns = ["Firstname_concordance"])
@@ -500,25 +502,23 @@ def concordance_sentiment_packager(labelDf,tokens_list):
 	episode, season,Contestant_index,index = season_episode_contestant_index(labelDf)
 	ConcordDf['Season'] = season
 	ConcordDf['Episode'] = episode
-	ConcordDf['Contestant']= Contestant_index
+	ConcordDf['Contestant_names']= Contestant_index
 	ConcordDf['Index'] = index
 
 	#ConcordDf['Index'] = ConcordDf.Index.apply(lambda k: int(k))#.astype(int)
 	#ConcordDf['Index'] = ConcordDf.Index.apply(lambda k: k.astype(int))
 	#ConcordDf['Index'] = ConcordDf.Index.apply(int())
-	ConcordDf["Contestant"] = ConcordDf.Contestant.apply(lambda k: k.split(" "))
+	ConcordDf["Contestant"] = ConcordDf.Contestant_names.apply(lambda k: k.split(" "))
 	#ConcordDf["Firstname_concordance"] = ConcordDf.apply(lambda row: row,axis=1)
 	#ConcordDf["Firstname_concordance"] = ConcordDf.Contestant.apply(lambda row: )
 	#ConcordDf["Firstname_concordance"] = concordance(tokens_list[ConcordDf.Index[0]],ConcordDf.Contestant,minrange=5,maxrange=5)
 
 	def search(row):
-		#pdb.set_trace()
 		return concordance(tokens_list[row.Index].tokens,row.Contestant,minrange=5,maxrange=5)
 
 	ConcordDf["Firstname_concordance"] = ConcordDf.apply(search, axis=1)
 	
 	def searchL(row):
-		#pdb.set_trace()
 		return last_concordance(tokens_list[row.Index].tokens,row.Contestant,minrange=5,maxrange=5)
 	
 	ConcordDf["Lastname_concordance"] = ConcordDf.apply(searchL, axis=1)
@@ -527,8 +527,39 @@ def concordance_sentiment_packager(labelDf,tokens_list):
 		
 		return Sentiment_score_FN(tokens_list[row.Index].tokens,row.Contestant,minrange=5,maxrange=5)
 	ConcordDf["Sentiment_score"] = ConcordDf.apply(sent_search,axis=1)
+	
+	'''
+	Specification: I want to add a target variable 1 if voted out, 0 otherwise
+	 for each episode in ConcordDf I want to find the corresponding episode in labelDf
+	 and find who was voted out
+	'''
+	#labelDf.Contestant_names = labelDf.Contestant_names.apply(lambda k: str(k))
+
+	ConcordDf = pd.merge(ConcordDf,labelDf[["Contestant_names","Episode_voted_out"]],how='left',on = "Contestant_names")
+	ConcordDf = ConcordDf[["Season","Episode","Contestant_names","Firstname_concordance","Lastname_concordance", "Sentiment_score","Episode_voted_out"]]
+	#sns.stripplot(x="Episode",y="Sentiment_score",data = ConcordDf)
+	#sns.stripplot(x="Episode",y="Sentiment_score",data = ConcordDf[ConcordDf.Season == 28])
+	#sns.stripplot(x="Episode",y="Sentiment_score",data = ConcordDf[ConcordDf.Season == 29])
+	#sns.plt.show()
+
+	def target(k):
+		if k == 
+		return insert 
+
+	ConcordDf["target"] = ConcordDf.Episode_voted_out.apply(lambda k: target(k))
 	pdb.set_trace()
-	labelDf
+
+
+	'''
+	for season,episode in set(zip(ConcordDf.Season,ConcordDf.Episode)):
+
+		labelDf.Contestant_names = labelDf.Contestant_names.apply(lambda k: k.split(" "))
+		#ConcordDf["target"] = ConcordDf[ConcordDf.Contestant == contestant_name.split(" ")]
+		contestant_name = labelDf.Contestant_names[(labelDf.Episode_voted_out == episode) & (labelDf.Season == season)]
+		#contestant_name = contestant_name.apply(lambda k: k.split(" "))
+		ConcordDf["target"] = ConcordDf[ConcordDf.Contestant == contestant_name.split(" ")]
+	'''
+	
 
 
 	#def concordance():
@@ -573,7 +604,7 @@ def concordance_sentiment_packager(labelDf,tokens_list):
 	TopDf = pd.concat(frames)
 	'''
 
-	ConcordDf = ConcordDf[["Season","Episode","Contestant","Firstname_concordance","Lastname_concordance", "Sentiment_score"]]
+	
 
 	#ConcordDf['Sentiment_score'] = [40*"Sentiment_score"]
 	return ConcordDf
@@ -682,6 +713,7 @@ def main():
 	'''
 	#ConcordDf = concordance_packager(labelDf,tokens_list)
 	sentimentDf = concordance_sentiment_packager(labelDf,tokens_list)
+	#ranked sentiment scores
 	#sentimentDf[sentimentDf.Episode == 1].sort('Sentiment_score',ascending = True)
 	pdb.set_trace()
 	
