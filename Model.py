@@ -229,7 +229,7 @@ def get_ep_tokens(EpID,master_sub_season):
 	lowers = text.lower()
 	no_punctuation = re.sub('[\W_]+', ' ', lowers)
 
-	#pdb.set_trace()
+	
 	#tokens = nltk.word_tokenize(no_punctuation)
 	tokenizer = RegexpTokenizer('\s+', gaps=True)
 	#tokens = tokenizer.tokenize(no_punctuation)
@@ -248,15 +248,106 @@ def get_ep_tokens(EpID,master_sub_season):
 
 #the list of names fed into concordance *important*
 #list_of_names = label_sub_season.Contestant_names.apply(lambda k: k.split(" "))
+def Sentiment_score_FN(tokenized_ep,indiv_name,minrange,maxrange):
+	'''
+	Pulled from http://www.clips.ua.ac.be/pages/pattern-en#sentiment
+	Input in tokenized subtitles from an episode, Input in a name, grabs the concordance around the name
+	'''
+	agg_firstname_concordance_dic = {}
+	agg_lastname_concordance_dic = {}
+	first_name_temp = []
+	last_name_temp = []
+	
+	first_name, last_name = indiv_name[0], indiv_name[1]
+	
+	#print(first_name,last_name)
+	first_name_index = [ i for i, j in enumerate(tokenized_ep) if j == first_name.lower()] 
+	last_name_index = [ i for i, j in enumerate(tokenized_ep) if j == last_name.lower()] 
 
-def concordance(tokenized_ep,list_of_names,minrange,maxrange):
+	for name_loc in first_name_index:
+		first_name_temp.append(tokenized_ep[name_loc-minrange:name_loc+maxrange])
+	agg_firstname_concordance_dic[first_name] = first_name_temp
+
+	text = first_name_temp
+	agg_sentiment = []
+
+	for i in text: 
+		combine = ' '.join(i)
+		blob = TextBlob(combine)
+		sentiment = blob.sentiment.polarity
+		agg_sentiment.append(sentiment)
+
+
+	try:
+		avg_sentiment = sum(agg_sentiment)/len(agg_sentiment)
+	except ZeroDivisionError:
+		avg_sentiment = 0
+	
+	#some names like 'So' kim are refercing to the word 'so' instead of name 'So', and will
+	#print(agg_firstname_concordance_dic)
+	first_name_temp = []
+	'''
+	for name_loc in last_name_index:
+		last_name_temp.append(tokenized_ep[name_loc-minrange:name_loc+maxrange])
+	agg_lastname_concordance_dic[last_name] = last_name_temp
+	return(agg_firstname_concordance_dic)
+	'''
+
+	return(avg_sentiment)
+
+def last_concordance(tokenized_ep,indiv_name,minrange,maxrange):
 
 	agg_firstname_concordance_dic = {}
 	agg_lastname_concordance_dic = {}
 	first_name_temp = []
 	last_name_temp = []
+	
+	first_name, last_name = indiv_name[0], indiv_name[1]
+	
+	#print(first_name,last_name)
+	first_name_index = [ i for i, j in enumerate(tokenized_ep) if j == first_name.lower()] 
+	last_name_index = [ i for i, j in enumerate(tokenized_ep) if j == last_name.lower()] 
 
+	for name_loc in first_name_index:
+		first_name_temp.append(tokenized_ep[name_loc-minrange:name_loc+maxrange])
+	agg_firstname_concordance_dic[first_name] = first_name_temp
+	#some names like 'So' kim are refercing to the word 'so' instead of name 'So', and will
+	#print(agg_firstname_concordance_dic)
+	first_name_temp = []
+
+	for name_loc in last_name_index:
+		last_name_temp.append(tokenized_ep[name_loc-minrange:name_loc+maxrange])
+	agg_lastname_concordance_dic[last_name] = last_name_temp	
+	return(agg_lastname_concordance_dic)
+
+def concordance(tokenized_ep,indiv_name,minrange,maxrange):
+
+	agg_firstname_concordance_dic = {}
+	agg_lastname_concordance_dic = {}
+	first_name_temp = []
+	last_name_temp = []
+	
+	first_name, last_name = indiv_name[0], indiv_name[1]
+	
+	#print(first_name,last_name)
+	first_name_index = [ i for i, j in enumerate(tokenized_ep) if j == first_name.lower()] 
+	last_name_index = [ i for i, j in enumerate(tokenized_ep) if j == last_name.lower()] 
+
+	for name_loc in first_name_index:
+		first_name_temp.append(tokenized_ep[name_loc-minrange:name_loc+maxrange])
+	agg_firstname_concordance_dic[first_name] = first_name_temp
+	#some names like 'So' kim are refercing to the word 'so' instead of name 'So', and will
+	#print(agg_firstname_concordance_dic)
+	first_name_temp = []
+
+	for name_loc in last_name_index:
+		last_name_temp.append(tokenized_ep[name_loc-minrange:name_loc+maxrange])
+	agg_lastname_concordance_dic[last_name] = last_name_temp	
+	
+
+	'''
 	for indiv_name in list_of_names:
+		pdb.set_trace()
 		first_name, last_name = indiv_name[0], indiv_name[1]
 		#print(first_name,last_name)
 		first_name_index = [ i for i, j in enumerate(tokenized_ep) if j == first_name.lower()] 
@@ -273,8 +364,8 @@ def concordance(tokenized_ep,list_of_names,minrange,maxrange):
 			last_name_temp.append(tokenized_ep[name_loc-minrange:name_loc+maxrange])
 		agg_lastname_concordance_dic[last_name] = last_name_temp	
 		last_name_temp = []
-		#pdb.set_trace()
-	return(agg_firstname_concordance_dic, agg_lastname_concordance_dic)
+	'''
+	return(agg_firstname_concordance_dic)#agg_lastname_concordance_dic
 
 def concordance_packager(labelDf,tokens_list):
 	firstname_concordance = []
@@ -283,6 +374,8 @@ def concordance_packager(labelDf,tokens_list):
 	columns = ["Season","Episode","Firstname_concordance","Lastname_concordance", "Sentiment_score"]
 	ConcordDf = pd.DataFrame(columns = columns)
 
+	TopDf = pd.DataFrame(columns = ["Firstname_concordance"])
+	
 	episode_list = [13, 15, 15, 14,14,14,14,16,14,14,14,15,15,14,14,14,13,14,15,15,15,13,15,14,14,14,14,13,14,14,11]
 	season_list = [i for i in range(1,32)]
 	episode_ord_dict = collections.OrderedDict()
@@ -299,6 +392,9 @@ def concordance_packager(labelDf,tokens_list):
 			row.append(episode)
 			aggrow.append(season)
 
+	ConcordDf['Season'] = aggrow
+	ConcordDf['Episode'] = row
+	
 	#the list of names fed into concordance *important*
 	#label_sub_season.Season.unique()
 	
@@ -309,19 +405,178 @@ def concordance_packager(labelDf,tokens_list):
 		first_con, last_con = concordance(textblob.tokens,list_of_names,minrange=5,maxrange=5)
 		firstname_concordance.append(first_con) 
 		lastname_concordance.append(last_con) 
+		
+		'''
+		BottomDf = pd.DataFrame(columns = ["Firstname_concordance"])
+
+		con = np.array(first_con.items())
+		BottomDf['Firstname_concordance'] = con
+		#i can get it out with con.item()
+		#.toarray().tolist()
+		frames = [TopDf,BottomDf]
+		TopDf = pd.concat(frames)
+		
+		'''
+		#pdb.set_trace()
 		#dictionary obj with key = contestant names, value = concordances around name
 	#panda df with season,episode,firstname_concordance,lastname_concordance, sentiment score
 	#then I want to rank the sentiment scores
 	ConcordDf['Season'] = aggrow
 	ConcordDf['Episode'] = row
+	# ******** commented out ******
+	#pdb.set_trace()
 	ConcordDf['Firstname_concordance'] = firstname_concordance
 	ConcordDf['Lastname_concordance'] = lastname_concordance
+	
+	'''
+	frames = [TopDf,MiddleDf]
+	TopDf = pd.concat(frames)
+	'''
 
 	ConcordDf = ConcordDf[["Season","Episode","Firstname_concordance","Lastname_concordance", "Sentiment_score"]]
 	#ConcordDf['Sentiment_score'] = [40*"Sentiment_score"]
 	return ConcordDf
 
+def concordance_sentiment_packager(labelDf,tokens_list):
+	firstname_concordance = []
+	lastname_concordance = []
 
+	columns = ["Season","Episode","Contestant","Firstname_concordance","Lastname_concordance", "Sentiment_score_FN"]
+	ConcordDf = pd.DataFrame(columns = columns)
+
+	TopDf = pd.DataFrame(columns = ["Firstname_concordance"])
+	
+	episode_list = [13, 15, 15, 14,14,14,14,16,14,14,14,15,15,14,14,14,13,14,15,15,15,13,15,14,14,14,14,13,14,14,11]
+	season_list = [i for i in range(1,32)]
+	episode_ord_dict = collections.OrderedDict()
+	for x,y in zip(season_list,episode_list):
+		episode_ord_dict[int(x)] = y 
+
+	#the list of names fed into concordance *important*
+	#label_sub_season.Season.unique()
+	
+	#S_unique
+
+	#labelDf.Season.unique()
+	#len(list_of_names)
+	def contestant_index(labelDf):
+		pass
+	'''
+	Contestant_index = []
+	for i in labelDf.Season.unique(): #subsets contestants based on season
+		subset = labelDf.Contestant_names[labelDf.Season == i]
+		list_of_names = subset.apply(lambda k: k.split(" "))
+		#Contestant_index = [list_of_names for i in range(1,18)]
+		episode_length = 17
+		for i in range(1,len(episode_length)+1):
+			Contestant_index.append(list_of_names)
+	pdb.set_trace()	
+	'''
+	def season_episode_contestant_index(labelDf):
+		row = []
+		aggrow = []
+		Contestant_index = []
+		a = 0
+		index = []
+		for season in labelDf.Season.unique():
+			contestantsPerSeason = labelDf.Contestant_names[labelDf.Season == season] 
+			episode_length = episode_ord_dict[season]
+
+			for episode in range(1,episode_length+1):
+				#row.append(episode)
+				subset_contestant = labelDf.Contestant_names[labelDf.Season == season]
+				list_of_names = labelDf.Contestant_names.apply(lambda k: k.split(" "))
+				row.extend([episode for i in range(1,len(subset_contestant)+1)])
+				index.extend([a for i in range(1,len(subset_contestant)+1)])
+				
+				#[episode for i in range(1,len(list_of_names)+1)] 
+				#aggrow.append(season)
+				aggrow.extend([season for i in range(1,len(subset_contestant)+1)])
+
+				Contestant_index.extend(subset_contestant)
+				a += 1
+		return (row,aggrow,Contestant_index,index)
+
+	episode, season,Contestant_index,index = season_episode_contestant_index(labelDf)
+	ConcordDf['Season'] = season
+	ConcordDf['Episode'] = episode
+	ConcordDf['Contestant']= Contestant_index
+	ConcordDf['Index'] = index
+
+	#ConcordDf['Index'] = ConcordDf.Index.apply(lambda k: int(k))#.astype(int)
+	#ConcordDf['Index'] = ConcordDf.Index.apply(lambda k: k.astype(int))
+	#ConcordDf['Index'] = ConcordDf.Index.apply(int())
+	ConcordDf["Contestant"] = ConcordDf.Contestant.apply(lambda k: k.split(" "))
+	#ConcordDf["Firstname_concordance"] = ConcordDf.apply(lambda row: row,axis=1)
+	#ConcordDf["Firstname_concordance"] = ConcordDf.Contestant.apply(lambda row: )
+	#ConcordDf["Firstname_concordance"] = concordance(tokens_list[ConcordDf.Index[0]],ConcordDf.Contestant,minrange=5,maxrange=5)
+
+	def search(row):
+		#pdb.set_trace()
+		return concordance(tokens_list[row.Index].tokens,row.Contestant,minrange=5,maxrange=5)
+
+	ConcordDf["Firstname_concordance"] = ConcordDf.apply(search, axis=1)
+	
+	def searchL(row):
+		#pdb.set_trace()
+		return last_concordance(tokens_list[row.Index].tokens,row.Contestant,minrange=5,maxrange=5)
+	
+	ConcordDf["Lastname_concordance"] = ConcordDf.apply(searchL, axis=1)
+
+	def sent_search(row):
+		
+		return Sentiment_score_FN(tokens_list[row.Index].tokens,row.Contestant,minrange=5,maxrange=5)
+	ConcordDf["Sentiment_score"] = ConcordDf.apply(sent_search,axis=1)
+	pdb.set_trace()
+	labelDf
+
+
+	#def concordance():
+	#	ConcordDf["Firstname_concordance"] = concordance(tokens_list[ConcordDf.Index[0]],ConcordDf.Contestant,minrange=5,maxrange=5)
+
+	#concordance(tokens_list[0],current_name,minrange=5,maxrange=5)
+	'''
+	
+	#for each row in contestant column, that becomes list of names. get the concordance for that specific episode and save it in firstname_concordance
+	#having difficulting subsetting through textblob 
+	#have a key that corresponds with Episode number and tokenblob index
+	ConcordDf["Firstname_concordance"] = ConcordDf.Firstname.apply(lambda current_name: concordance(tokens_list[0],current_name,minrange=5,maxrange=5))
+
+	for textblob in tokens_list: #tokens_list is a list of tokens. Each one is a episode subsetted by time and season 
+		
+		ConcordDf["Firstname_concordance"] = ConcordDf.Firstname.apply(lambda current_name: concordance(textblob.tokens,current_name,minrange=5,maxrange=5))
+		#first_con, last_con = concordance(textblob.tokens,current_name,minrange=5,maxrange=5)
+		#firstname_concordance.append(first_con) 
+		#lastname_concordance.append(last_con) 
+	'''
+	#aggrow.extend([list_of_names for i in range(1,len(episode_length)+1)])
+
+
+
+	#****** each episode_blob is an episode tokenized, for each row feed in the contestant in each row into the concordance function
+	#fill in the concordance
+
+
+	
+		
+		#dictionary obj with key = contestant names, value = concordances around name
+	#panda df with season,episode,firstname_concordance,lastname_concordance, sentiment score
+	#then I want to rank the sentiment scores
+
+	# ******** commented out ******
+	
+	#ConcordDf['Firstname_concordance'] = firstname_concordance
+	#ConcordDf['Lastname_concordance'] = lastname_concordance
+	
+	'''
+	frames = [TopDf,MiddleDf]
+	TopDf = pd.concat(frames)
+	'''
+
+	ConcordDf = ConcordDf[["Season","Episode","Contestant","Firstname_concordance","Lastname_concordance", "Sentiment_score"]]
+
+	#ConcordDf['Sentiment_score'] = [40*"Sentiment_score"]
+	return ConcordDf
 
 #ngrams of concordances
 
@@ -392,12 +647,16 @@ def main():
 
 	#model 1:
 	#fit_model_1(labelDf)
-	#pdb.set_trace()
+	
 
 	#model 2:(WIP)
 	
 	#remove noise
-	subset_1 = masterDf[(masterDf.begin > sub_datetime("00:26:00")) & (masterDf.end < sub_datetime("00:36:14")) ]
+
+	#******removed timestamps, add back later*******
+	#***************************************
+	subset_1 = masterDf[(masterDf.begin > sub_datetime("00:00:00")) & (masterDf.end < sub_datetime("00:36:14")) ]
+	#subset_1 = masterDf
 	labelDf = labelDf[["Contestant_names","Finish","Season"]]
 	
 	#subset of data to work on at first
@@ -417,10 +676,16 @@ def main():
 	#list_of_names = label_sub_season.Contestant_names.apply(lambda k: k.split(" "))
 
 	rows = featureDf_index(labelDf)
-
-	#model 3:(WIP)
-	ConcordDf = concordance_packager(labelDf,tokens_list)
+	
+	'''
+	model 3: sentiment score
+	'''
+	#ConcordDf = concordance_packager(labelDf,tokens_list)
+	sentimentDf = concordance_sentiment_packager(labelDf,tokens_list)
+	#sentimentDf[sentimentDf.Episode == 1].sort('Sentiment_score',ascending = True)
 	pdb.set_trace()
+	
+	
 
 main()
 
