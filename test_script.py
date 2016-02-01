@@ -12,12 +12,12 @@ def n_concordance_tokenised(text,phrase,left_margin=5,right_margin=5):
     #For each token in the phraselist, find the offsets and rebase them to the start of the phrase
     for i in range(len(phraseList)):
         offsets_norm.append([x-i for x in offsets[i]])
-    #We have found the offset of a phrase if the rebased values intersect
-    #--
-    # http://stackoverflow.com/a/3852792/454773
-    #the intersection method takes an arbitrary amount of arguments
-    #result = set(d[0]).intersection(*d[1:])
-    #--
+    '''We have found the offset of a phrase if the rebased values intersect
+    --
+     http://stackoverflow.com/a/3852792/454773
+    the intersection method takes an arbitrary amount of arguments
+    result = set(d[0]).intersection(*d[1:])
+    '''
     intersects=set(offsets_norm[0]).intersection(*offsets_norm[1:])
      
     concordance_txt = ([text.tokens[map(lambda x: x-left_margin if (x-left_margin) > 0 else 0,[offset])[0]:offset+len(phraseList)+right_margin]
